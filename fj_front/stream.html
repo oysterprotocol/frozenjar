@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html><head>
+
+    <meta charset="utf-8">
+    <title>StreamSaver example</title>
+
+</head><body>
+<script type="text/javascript">
+    function download(filename, text) {
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+        element.setAttribute('download', filename);
+
+        element.style.display = 'none';
+        document.body.appendChild(element);
+
+        element.click();
+
+        document.body.removeChild(element);
+    }
+
+    // Start file download.
+    //download("hello.txt","This is the content of my file :)");
+
+</script>
+</body></html>

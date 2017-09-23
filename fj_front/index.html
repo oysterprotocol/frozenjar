@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Frozenjar - Secure Anonymous Storage</title>
+	<style type="text/css">
+		html {
+			height: 100%;
+			background-color: #636363;
+			font-family: georegular,sans-serif;
+		}
+		@font-face {
+			font-family: 'georegular';
+			src: url('georegular.ttf');
+		}
+		@font-face {
+			font-family: 'geomedium';
+			src: url('geomedium.ttf');
+		}
+		@font-face {
+			font-family: 'geobold';
+			src: url('geobold.ttf');
+		}
+		.fj_logo_a {
+			background-color:#409dd6;
+		}
+		.fj_logo_b {
+			background-color: #121212;
+		}
+		.fj_nav a {
+			text-decoration: none;
+			color: #686868;
+			font-size:18px;
+			font-weight:bold;
+			font-family: georegular,sans-serif;
+		}
+		.fj_fixed {
+			display: inline-block;
+			position: relative;
+			padding: 12px 12px 4px;
+		}
+		.fj_fixed:after {
+			content: '';
+			display: block;
+			margin: auto;
+			height: 4px;
+			width: 100%;
+			background: #409dd6;
+			transition: width .5s ease, background-color .5s ease;
+		}
+		.fj_underline {
+			display: inline-block;
+			position: relative;
+			padding: 12px 12px 4px;
+		}
+		.fj_underline:after {
+			content: '';
+			display: block;
+			margin: auto;
+			height: 4px;
+			width: 0;
+			background: transparent;
+			transition: width .5s ease, background-color .5s ease;
+		}
+		.fj_underline:hover:after {
+			width: 100%;
+			background: #409dd6;
+		}
+		.field {
+			background: transparent;
+			font-family: geomedium, sans serif;
+			padding: 6px;
+			color:#f7f7f7;
+			border: 2px solid #f7f7f7;
+			text-transform: uppercase;
+			position: absolute;
+			overflow: hidden;
+			transition: .3s;
+			z-index:400;
+		}
+		.button {
+			font-size:20px;
+			font-family: geomedium, sans serif;
+			padding: 12px;
+			color:#f7f7f7;
+			border: 2px solid #f7f7f7;
+			text-align: center;
+			text-transform: uppercase;
+			position: absolute;
+			overflow: hidden;
+			transition: .3s;
+			z-index:400;
+		}
+		.button_pushed {
+			font-size:20px;
+			font-family: geomedium, sans serif;
+			width:200px;
+			padding: 12px;
+			color:#409dd6;
+			border: 2px solid #f7f7f7;
+			text-align: center;
+			text-transform: uppercase;
+			background: #f7f7f7;
+			position: absolute;
+			overflow: hidden;
+			transition: .3s;
+			z-index:400;
+		}
+		.button_pushed:hover {
+			cursor:pointer;
+		}
+		.button:after {
+			position: absolute;
+			transition: .3s;
+			content: '';
+			width: 0;
+			bottom: 0;
+			background: #f7f7f7;
+			height: 120%;
+			left: -10%;
+			transform: skewX(15deg);
+			z-index: -1;
+		 }
+		.button:hover {
+			cursor:pointer;
+			color: #409dd6;
+		}
+		.button:hover:after {
+			left: -10%;
+			width: 120%;
+		}
+		.label {
+			padding:4px;
+			font-size:14px;
+			font-family: geomedium, sans serif;
+			position:absolute;
+			width:37px;
+			height:18px;
+			color:#409dd6;
+			background: #f7f7f7;
+			overflow: hidden;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<div style="position:absolute;top:0;left:0;width:100%;height:108px;background-color: #121212;"></div>
+	<div style="position:absolute;top:108px;left:0;width:100%;height:4px;background-color: #424040;"></div>
+	<div style="position:absolute;top:10px;left:calc(50% + 8px);transform:translateX(-50%);width:440px;">
+		<div id="fj_logo" class="fj_logo_b" style="position:relative;top:0;left:0;width:60px;height:90px;" onmouseover="this.style.cursor = 'pointer'">
+			<div class="fj_logo_a" style="position:absolute;top:0;left:0;width:100%;height:6%;"></div>
+			<div class="fj_logo_a" style="position:absolute;top:9%;left:0;width:100%;height:6%;"></div>
+			<div class="fj_logo_a" style="position:absolute;top:20%;left:0;width:25%;height:60%;"></div>
+			<div class="fj_logo_a" style="position:absolute;top:30%;left:24%;width:41%;height:13%;"></div>
+			<div class="fj_logo_a" style="position:absolute;top:20%;right:0;width:25%;height:66%;"></div>
+			<div class="fj_logo_a" style="position:absolute;bottom:0;right:0;width:55%;height:14%;border-bottom-right-radius:20px;"></div>
+			<div class="fj_logo_a" style="position:absolute;bottom:14%;right:25%;width:20%;height:10%;z-index:10;"></div>
+			<div class="fj_logo_b" style="position:absolute;bottom:14%;right:25%;width:20%;height:10%;border-bottom-right-radius:5px;z-index:20;"></div>
+		</div>
+		<div class="fj_nav" style="position:absolute;width:calc(100% - 50px);top:4px;right:0;">
+			<ul id="fj_nav_list">
+				<li id="fj_jars" class="fj_underline" onclick="fj_nav('fj_jars')"><a href="#">Jars</a></li>
+				<li id="fj_nodes" class="fj_underline" onclick="fj_nav('fj_nodes')"><a href="#">Nodes</a></li>
+				<li id="fj_developers" class="fj_underline" onclick="fj_nav('fj_developers')"><a href="#">Developers</a></li>
+				<li id="fj_audit" class="fj_underline" onclick="fj_nav('fj_audit')"><a href="#">Audit</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="fj_inner" style="position:absolute;top:112px;left:0;width:100%;height:calc(100% - 112px);z-index:100">
+		<div id="fj_jars_inner" style="display:none;position:absolute;top:0;left:0;width:100%;">
+			<div id="fj_jar_interface" style="display:none;position:absolute;left:50%;transform:translateX(-50%);width:580px;">
+				<div style="position:absolute;top:10px;width:100%;height:135px;border:4px dashed #3480AD;background-color:#6a6a6a">
+					<div class="label" style="left:8px;top:8px;">KEY</div>
+					<input id="fj_jar_handle" type="password" class="field" style="position:absolute;font-size:16px;left:50px;width:384px;height:10px;top:8px;" onfocus="fj_paste_focus()" value="JAR-12345678" />
+					<div class="label" style="left:8px;top:38px;">NAME</div>
+					<input id="fj_jar_name" type="text" class="field" style="position:absolute;font-size:16px;left:50px;width:150px;height:10px;top:38px;" onfocus="fj_paste_focus()" value="JAR-12345678" />
+					<div class="label" style="left:8px;top:68px;">SIZE</div>
+					<input id="fj_jar_size" type="text" class="field" style="position:absolute;font-size:16px;left:50px;width:150px;height:10px;top:68px;" onfocus="fj_paste_focus()" value="JAR-12345678" />
+					<div class="label" style="left:8px;top:98px;">STATE</div>
+					<input id="fj_jar_state" type="text" class="field" style="position:absolute;font-size:16px;left:50px;width:150px;height:10px;top:98px;" onfocus="fj_paste_focus()" value="JAR-12345678" />
+					<div class="label" style="left:222px;top:38px;width:57px">CREATED</div>
+					<input id="fj_jar_created" type="text" class="field" style="position:absolute;font-size:16px;left:284px;width:150px;height:10px;top:38px;" onfocus="fj_paste_focus()" value="JAR-12345678" />
+					<div class="label" style="left:222px;top:68px;width:57px">EXPIRED</div>
+					<input id="fj_jar_expired" type="text" class="field" style="position:absolute;font-size:16px;left:284px;width:150px;height:10px;top:68px;" onfocus="fj_paste_focus()" value="JAR-12345678" />
+					<div id="fj_jar_freeze" class="button" style="width:100px;position:absolute;right:8px;top:8px;padding:6px;font-size:20px;height:40px;" onclick="fj_paste_toggle()">
+						Freeze jar<br><span style="position:relative;top:-8px;font-size:10px;color:#bbbbbb">Auto-Freeze in 12:48</span>
+					</div>
+					<div id="fj_jar_pay" class="button" style="width:104px;position:absolute;right:8px;height:14px;top:68px;padding:4px;font-size:14px;" onclick="fj_paste_toggle()">
+						<span style="position:relative;top:-2px;">Add time</span>
+					</div>
+					<div id="fj_jar_auth" class="button" style="width:104px;position:absolute;right:8px;height:14px;top:98px;padding:4px;font-size:14px;" onclick="fj_paste_toggle()">
+						<span style="position:relative;top:-2px;">Two Factor</span>
+					</div>
+				</div>
+				<div style="position:absolute;top:175px;width:100%;height:400px;border-bottom-left-radius:60px;border-bottom-right-radius:60px;border:5px dashed #3480AD;background-color:#6a6a6a"></div>
+			</div>
+			<div id="fj_jar_splash">
+				<div style="position:absolute;top:0;left:0;width:100%;z-index:100;">
+					<canvas id=c ></canvas>
+				</div>
+				<div style="position:absolute;top:0;left:50%;transform:translateX(-50%);background:rgba(52,128,173, 0.81);width:500px;height:400px;z-index:200;">
+					<div style="position:absolute;top:0;left:-50px;background:linear-gradient(to left, rgba(52,128,173, 0.81), rgba(52,128,173, 0.001));width:50px;height:100%;z-index:200;"></div>
+					<div style="position:absolute;top:0;right:-50px;background:linear-gradient(to right, rgba(52,128,173, 0.81), rgba(52,128,173, 0.001));width:50px;height:100%;z-index:200;"></div>
+				</div>
+				<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);width:530px;height:350px;color:#F7F7F7;text-align:center;z-index:300">
+					<div style="font-family: geobold,sans-serif;font-size:40px;">Secure Anonymous Storage</div>
+					<div style="position:relative;left:50%;transform:translateX(-50%);width:530px;font-size:20px;"><span style="font-family: geomedium,sans-serif;">Jars</span> are encrypted containers of information that are fragmented and distributed throughout the internet. All encryption occurs on the client-side, so no one can ever open the jar except you. There are no usernames and passwords. Each jar has a unique handle that unlocks the contents anonymously.</div>
+					<div class="button" style="width:200px;left:10px;bottom:60px;" onclick="fj_jar_create()">Create jar</div>
+					<div id="fj_jar_defrost" class="button" style="width:200px;right:10px;bottom:60px;" onclick="fj_paste_toggle()">Defrost jar</div>
+					<div id="fj_paste_overlay" style="display:none;position:absolute;width:462px;height:12px;bottom:36px;left:50%;transform:translateX(-50%);text-align:center;font-family: geomedium, sans serif;font-size:16px;">PASTE JAR HANDLE HERE</div>
+					<input id="fj_paste" type="password" class="field" style="display:none;padding:12px;font-size:16px;left:10px;width:462px;height:12px;bottom:8px;" onfocus="fj_paste_focus()" />
+				</div>
+				<div style="position:absolute;top:430px;left:50%;transform:translateX(-50%);width:100%;z-index:200;">
+					<div style="position:absolute;left:50%;transform:translateX(-50%);width:300px;color:#F7F7F7;">
+						<div style="position:absolute;left:0;width:50%;text-align:center">
+							<span style="padding:8px;border-radius:6px;background-color:#3480AD;font-family: geomedium,sans-serif;">
+								STANDARD
+							</span>
+							<div style="position:relative;top:16px;font-size:32px;">
+								$0.02
+							</div>
+							<div style="position:relative;top:16px;font-size:10px;">
+								per GB per month
+							</div>
+							<div style="position:relative;top:30px;font-size:24px;">
+								36 hours
+							</div>
+							<div style="position:relative;top:30px;font-size:8px;">
+								per GB average defrost time
+							</div>
+						</div>
+						<div style="position:absolute;right:0;width:50%;text-align: center">
+							<span style="padding:8px;border-radius:6px;background-color:#7862ba;font-family: geomedium,sans-serif;">
+								PRIORITY
+							</span>
+							<div style="position:relative;top:16px;font-size:32px;">
+								$0.04
+							</div>
+							<div style="position:relative;top:16px;font-size:10px;">
+								per GB per month
+							</div>
+							<div style="position:relative;top:30px;font-size:24px;">
+								12 hours
+							</div>
+							<div style="position:relative;top:30px;font-size:8px;">
+								per GB average defrost time
+							</div>
+						</div>
+						<div style="position:relative;top:150px;background-color:#373737;padding:8px;border-radius:6px;text-align:center;font-size:12px;">
+							Payments are made in Bitcoin. If you don't know how to use Bitcoin, it's very easy to get a digital wallet at coinbase.com and immediately make a payment.
+						</div>
+						<div style="position:relative;top:170px;background-color:#373737;padding:8px;border-radius:6px;text-align:center;font-size:12px;">
+							Defrosting a jar deducts 1 month's worth of credit.
+						</div>
+						<div style="position:relative;top:190px;background-color:#373737;padding:8px;border-radius:6px;text-align:center;font-size:12px;">
+							Jars can be created free of charge at 5MB for 5 months.
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="fj_nodes_inner" style="display:none;position:absolute;top:0;left:0;width:100%;">
+			<div style="position:absolute;top:0;left:0;width:100%;height:400px;background:linear-gradient(to bottom right, #736f6f,#464444);z-index:100;">
+				<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);width:530px;height:350px;color:#F7F7F7;text-align:center;z-index:300">
+					<div style="font-family: geobold,sans-serif;font-size:40px;">Monetize Your Website</div>
+					<div style="position:relative;top:-4px;font-family: geomedium,sans-serif;font-size:20px;">with one line of code</div>
+					<div style="position:relative;top:4px;left:50%;transform:translateX(-50%);font-family:'Courier new',monospace;font-size:14px;font-weight:bold;width:730px;padding:8px;border-radius:8px;background-color:#2e2e2e;"><span style="color:#925a00">&lt;script</span>&nbsp;<span style="color:#d0b900">id</span><span style="color:#828282">=</span><span style="color:#83AC6F">"fj.js"</span>&nbsp;<span style="color:#d0b900">payout</span><span style="color:#828282">=</span><span style="color:#83AC6F">"BTC_ADDRESS"</span>&nbsp;<span style="color:#d0b900">src</span><span style="color:#828282">=</span><span style="color:#83AC6F">"http://js.frozenjar.com/fj.js"</span><span style="color:#925a00">&gt;&lt;/script&gt;</span></div>
+					<div style="position:relative;top:10px;left:50%;transform:translateX(-50%);width:530px;font-size:20px;"><span style="font-family: geomedium,sans-serif;">Nodes</span> are websites that distribute fragments of frozen jars. When someone visits a node, a small portion of their storage space is used to store and retrieve jar fragments. Thus website owners are able to monetize their content in a clean, discrete and effective way. Earnings are automatically payed out to the Bitcoin address provided.</div>
+				</div>
+			</div>
+		</div>
+		<div id="fj_developers_inner" style="display:none;position:absolute;top:0;left:0;width:100%;">DEVELOPERS</div>
+		<div id="fj_audit_inner" style="display:none;position:absolute;top:0;left:0;width:100%;">AUDIT</div>
+	</div>
+	<script type="text/javascript">
+		//<div class="button" style="bottom:10px;right:0;font-size:10px;padding:4px;width:65px;">MONETIZE TRAFFIC</div>
+		function fj_jar_create() {
+			fj_fade("fj_jar_splash", 100, 0, 200);
+			fj_fade("fj_jar_interface", 0, 100, 200);
+		}
+		function fj_paste_focus() {
+			fj_element('fj_paste_overlay').style.display = "none";
+		}
+		function fj_paste_unfocus() {
+			if (fj_element("fj_paste").value.length==0) fj_element('fj_paste_overlay').style.display = "block";
+		}
+		function fj_paste_toggle() {
+			if (fj_element("fj_paste").style.display=="none") {
+				fj_fade("fj_paste", 0, 100, 400);
+				setTimeout("fj_fade('fj_paste_overlay', 0, 100, 200)", 200);
+				fj_element("fj_jar_defrost").className = "button_pushed";
+			}
+			else {
+				fj_fade("fj_paste", 100, 0, 400);
+				setTimeout("fj_fade('fj_paste_overlay', 100, 0, 400)", 200);
+				setTimeout("fj_element('fj_paste').value = ''", 401);
+				fj_element("fj_jar_defrost").className = "button";
+			}
+		}
+		function fj_element(fj_id) {
+			return document.getElementById(fj_id);
+		}
+		function fj_fade(sc_id, sc_start, sc_end, sc_time) {
+			var i;
+			var sc_speed = Math.round(sc_time/85);
+			var sc_counter = 0;
+			if (sc_start>sc_end) {
+				for (i = sc_start; i>=sc_end; i--) {
+					setTimeout("fj_opacity("+i+",'"+sc_id+"')", (sc_counter*sc_speed));
+					sc_counter++;
+				}
+				setTimeout("fj_element('"+sc_id+"').style.display = 'none'", (sc_counter*sc_speed));
+			}
+			else if (sc_start<sc_end) {
+				for (i = sc_start; i<=sc_end; i++) {
+					setTimeout("fj_opacity("+i+",'"+sc_id+"')", (sc_counter*sc_speed));
+					if (sc_counter==0) setTimeout("fj_element('"+sc_id+"').style.display = 'block'", (sc_counter*sc_speed)+1);
+					sc_counter++;
+				}
+			}
+		}
+		function fj_opacity(sc_opacity, sc_id) {
+			if (!fj_element(sc_id)) {
+				return false;
+			}
+			var object = fj_element(sc_id).style;
+			object.opacity = (sc_opacity/100);
+			object.MozOpacity = (sc_opacity/100);
+			object.KhtmlOpacity = (sc_opacity/100);
+			object.filter = "alpha(opacity="+sc_opacity+")";
+		}
+		function fj_nav(fj_nav_base) {
+			if (window.FJ_NAV==fj_nav_base) return true;
+			var fj_nav_list = fj_element("fj_nav_list").getElementsByTagName("li");
+			var i;
+			for (i in fj_nav_list) {
+				if (fj_nav_list[i].id==fj_nav_base) fj_nav_list[i].className = "fj_fixed";
+				else fj_nav_list[i].className = "fj_underline";
+			}
+			if (window.FJ_NAV!==false) {
+				fj_fade(window.FJ_NAV+"_inner", 100, 0, 150);
+			}
+			fj_fade(fj_nav_base+"_inner", 0, 100, 150);
+			window.FJ_NAV = fj_nav_base;
+			return true;
+		}
+		/*
+		var fj_http_timeout;
+		var fj_http_retry;
+		var fj_http_object = false;
+		function fj_nav(fj_nav_code) {
+			if (fj_http_object!==false) {
+				fj_http_object.abort();
+				clearTimeout(fj_http_timeout);
+				clearTimeout(fj_http_retry);
+			}
+			else {
+				if (fj_element("fj_load").style.display=="none"&&typeof window.FJ_LOAD[fj_nav_code]=="undefined") fj_fade("fj_load", 0, 100, 100);
+				if (window.FJ_NAV!==false) {
+					//alert(window.FJ_NAV);
+					fj_fade(window.FJ_NAV+"_inner", 100, 0, 100);
+				}
+			}
+			var fj_nav_base;
+			if (fj_nav_code==1) fj_nav_base = "fj_jars";
+			else if (fj_nav_code==2) fj_nav_base = "fj_nodes";
+			else if (fj_nav_code==3) fj_nav_base = "fj_developers";
+			else if (fj_nav_code==4) fj_nav_base = "fj_audit";
+			else return false;
+			var fj_nav_list = fj_element("fj_nav_list").getElementsByTagName("li");
+			var i;
+			for (i in fj_nav_list) {
+				if (fj_nav_list[i].id==fj_nav_base) fj_nav_list[i].className = "fj_fixed";
+				else fj_nav_list[i].className = "fj_underline";
+			}
+			if (typeof window.FJ_LOAD[fj_nav_code]!="undefined") {
+				window.FJ_NAV = fj_nav_base;
+				setTimeout(fj_unload, 110);
+				fj_http_object = false;
+				return true;
+			}
+			fj_http_object = new XMLHttpRequest();
+			fj_http_object.onreadystatechange = function () {
+				if (fj_http_object.readyState==4&&fj_http_object.status==200) {
+					clearTimeout(fj_http_timeout);
+					window.FJ_HTTP_THREAD = false;
+					window.FJ_NAV = fj_nav_base;
+					if (fj_http_object.responseText.length>0) fj_element(fj_nav_base+'_inner').innerHTML = fj_http_object.responseText;
+					fj_opacity(0, fj_nav_base+"_inner");
+					fj_element(fj_nav_base+"_inner").style.display = "block";
+					if (fj_nav_code==1) {
+						var fj_script = document.createElement("script");
+						fj_script.type = "text/javascript";
+						fj_script.src = fj_nav_base+".js";
+						document.body.appendChild(fj_script);
+					}
+					setTimeout(fj_unload, 220);
+					window.FJ_LOAD[fj_nav_code] = true;
+					fj_http_object = false;
+				}
+			};
+			fj_http_object.open("POST", fj_nav_base+".php", true);
+			fj_http_object.send();
+			fj_http_timeout = setTimeout(fj_http_error, 5000);
+			function fj_http_error() {
+				fj_http_object.abort();
+				fj_error_state();
+				fj_http_retry = setTimeout("fj_nav("+fj_nav_code+")", 5000);
+			}
+		}
+		function fj_error_state() {
+			//alert("error state");
+		}
+*/
+		fj_opacity(0, "fj_jars_inner");
+		fj_element("fj_jars_inner").style.display = "block";
+		var w = c.width = document.getElementById('fj_inner').offsetWidth,
+			h = c.height = 400,
+			ctx = c.getContext('2d'),
+
+			opts = {
+
+				len: 62,
+				count: 95,
+				baseTime: 10,
+				addedTime: 10,
+				dieChance: .025,
+				spawnChance: 1,
+				sparkChance: 0,
+				sparkDist: 14,
+				sparkSize: 2,
+
+				color: 'hsl(hue,100%,20%)',
+				baseLight: 50,
+				addedLight: 10, // [50-10,50+10]
+				shadowToTimePropMult: 6,
+				baseLightInputMultiplier: .01,
+				addedLightInputMultiplier: .02,
+
+				cx: w / 2,
+				cy: h / 2,
+				repaintAlpha: .04,
+				hueChange: .1
+			},
+
+			tick = 0,
+			lines = [],
+			dieX = w / 2 / opts.len,
+			dieY = h / 2 / opts.len,
+
+			baseRad = Math.PI * 2 / 6;
+
+		fj_element("fj_jars_inner").style.display = "none";
+
+		ctx.fillStyle = 'rgb(52,128,173)';
+		ctx.fillRect( 0, 0, w, h );
+
+		function loop() {
+			window.requestAnimationFrame( loop );
+
+			++tick;
+
+			ctx.globalCompositeOperation = 'source-over';
+			ctx.shadowBlur = 0;
+			ctx.fillStyle = 'rgba(52,128,173,alp)'.replace( 'alp', "0.1" );
+			ctx.fillRect( 0, 0, w, h );
+			ctx.globalCompositeOperation = 'lighter';
+
+			if( lines.length < opts.count && Math.random() < opts.spawnChance )
+				lines.push( new Line );
+
+			lines.map( function( line ){ line.step(); } );
+		}
+		function Line(){
+			this.reset();
+		}
+		Line.prototype.reset = function() {
+
+			this.x = 0;
+			this.y = 0;
+			this.addedX = 0;
+			this.addedY = 0;
+
+			this.rad = 0;
+
+			this.lightInputMultiplier = opts.baseLightInputMultiplier + opts.addedLightInputMultiplier * Math.random();
+
+			this.color = opts.color.replace('hue', 210);
+			this.cumulativeTime = 0;
+
+			this.beginPhase();
+		};
+		Line.prototype.beginPhase = function() {
+
+			this.x += this.addedX;
+			this.y += this.addedY;
+
+			this.time = 0;
+			this.targetTime = (opts.baseTime + opts.addedTime * Math.random()) |0;
+
+			this.rad += baseRad * ( Math.random() < .5 ? 1 : -1 );
+			this.addedX = Math.cos( this.rad );
+			this.addedY = Math.sin( this.rad );
+
+			if( Math.random() < opts.dieChance || this.x > dieX || this.x < -dieX || this.y > dieY || this.y < -dieY )
+				this.reset();
+		};
+		Line.prototype.step = function() {
+
+			++this.time;
+			++this.cumulativeTime;
+
+			if( this.time >= this.targetTime )
+				this.beginPhase();
+
+			var prop = this.time / this.targetTime,
+				wave = Math.sin(prop * Math.PI / 2),
+				x = this.addedX * wave,
+				y = this.addedY * wave;
+
+			ctx.shadowBlur = prop * opts.shadowToTimePropMult;
+			ctx.fillStyle = ctx.shadowColor = this.color;
+			ctx.fillRect( opts.cx + ( this.x + x ) * opts.len, opts.cy + ( this.y + y ) * opts.len, 2, 2 );
+
+			if( Math.random() < opts.sparkChance )
+				ctx.fillRect( opts.cx + ( this.x + x ) * opts.len + Math.random() * opts.sparkDist * ( Math.random() < .5 ? 1 : -1 ) - opts.sparkSize / 2, opts.cy + ( this.y + y ) * opts.len + Math.random() * opts.sparkDist * ( Math.random() < .5 ? 1 : -1 ) - opts.sparkSize / 2, opts.sparkSize, opts.sparkSize )
+		};
+		window.addEventListener('resize', function() {
+			w = c.width = document.getElementById('fj_inner').offsetWidth;
+			h = c.height = 400;
+			ctx.fillStyle = 'rgb(52,128,173)';
+			ctx.fillRect(0, 0, w, h);
+
+			opts.cx = w/2;
+			opts.cy = h/2;
+
+			dieX = w/2/opts.len;
+			dieY = h/2/opts.len;
+		});
+		window.FJ_NAV = false;
+		fj_nav("fj_jars");
+		fj_jar_create();//todo delete me
+		//fj_element("fj_jars_inner").style.display = "block";
+		loop();
+	</script>
+</body>
+</html>
